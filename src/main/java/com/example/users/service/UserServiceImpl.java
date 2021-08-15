@@ -4,6 +4,7 @@ package com.example.users.service;
 import com.example.users.UserDto;
 import com.example.users.entity.UserEntity;
 import com.example.users.model.AlbumResponseModel;
+import com.example.users.model.UserRequestModel;
 import com.example.users.repository.UsersRepository;
 
 
@@ -11,6 +12,8 @@ import com.example.users.repository.UsersRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import javax.annotation.PostConstruct;
 
 //import javax.ws.rs.HttpMethod;
 
@@ -28,6 +31,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -44,6 +48,9 @@ public class UserServiceImpl implements UserService
 	BCryptPasswordEncoder bCryptPasswordEncoder;
 	
 	@Autowired
+	ModelMapper modelMapper;
+	
+	@Autowired
 	RestTemplate restTemplate;
 	
 	/*@Autowired
@@ -53,6 +60,17 @@ public class UserServiceImpl implements UserService
 	Environment env;
 	
 	
+	
+	
+
+	@PostConstruct
+   public void modelMapperConfigurationSetup() {
+		modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+	   
+   }
+	
+	
+	
 	@Override
 	public UserDto createUser(UserDto userDetails) {
 		
@@ -60,8 +78,8 @@ public class UserServiceImpl implements UserService
 		
 		userDetails.setEncryptedPassword(bCryptPasswordEncoder.encode(userDetails.getPassword()));
 		// TODO Auto-generated method stub
-		ModelMapper modelMapper = new ModelMapper();
-		modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+		
+		
 		UserEntity userEntity = modelMapper.map(userDetails, UserEntity.class);
 		
 		UserEntity savedEntity=repo.save(userEntity);
@@ -70,6 +88,7 @@ public class UserServiceImpl implements UserService
 		return dtoReturn;
 	}
 
+	//when spring frame work is trying to authenticate the user 
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException 
@@ -94,7 +113,7 @@ public class UserServiceImpl implements UserService
 		}
 		
 		
-		return new ModelMapper().map(userEntity, UserDto.class);
+		return modelMapper.map(userEntity, UserDto.class);
 	}
 
 
@@ -113,8 +132,8 @@ public class UserServiceImpl implements UserService
 				<List<AlbumResponseModel>>() {});
 		List<AlbumResponseModel> albums = albumList.getBody();
 		//List<AlbumResponseModel> albums = client.getAlbums(userId);
-		logger.info("after calling albums service");
-		UserDto userDto=new ModelMapper().map(userEntity, UserDto.class);
+		logger.info("after calling albums micro services");
+		UserDto userDto=modelMapper.map(userEntity, UserDto.class);
 		
 		userDto.setAlbums(albums);
 		
@@ -131,9 +150,30 @@ public class UserServiceImpl implements UserService
 		}
 		List<AlbumResponseModel> albums = new ArrayList<AlbumResponseModel>();
 		
-		UserDto userDto=new ModelMapper().map(userEntity, UserDto.class);
+		UserDto userDto=modelMapper.map(userEntity, UserDto.class);
 		userDto.setAlbums(albums);
 		
+		return userDto;
+	}
+
+    @Transactional
+	@Override
+	public void deleteUserByUserId(String userId) 
+	{
+	    repo.deleteByUserId(userId);
+		
+	}
+
+    
+
+	@Override
+	public UserDto updateUserByUserId(String userId,UserRequestModel user) {
+		UserEntity fetchedUser=repo.findByUserId(userId);
+		fetchedUser.setFirstName(user.getFirstName());
+		fetchedUser.setLastName(user.getLastName());
+		UserEntity entity=repo.save(fetchedUser);
+		
+		UserDto userDto=modelMapper.map(entity, UserDto.class);
 		return userDto;
 	}
 	

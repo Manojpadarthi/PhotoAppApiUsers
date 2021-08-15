@@ -1,7 +1,5 @@
 package com.example.users.security;
 
-import javax.servlet.Filter;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -15,7 +13,7 @@ import com.example.users.service.UserService;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	
 	
 	@Autowired
@@ -39,10 +37,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	private AuthenticationFilter getAuthenticationFilter() throws Exception {
-		AuthenticationFilter authenticationFilter = new AuthenticationFilter( userService,
+		AuthenticationFilter authenticationFilter = new AuthenticationFilter(userService,
 				environment,authenticationManager());
 
-		//authenticationFilter.setAuthenticationManager(authenticationManager());
+		
+		// for custom url instead of /login
 		authenticationFilter.setFilterProcessesUrl("/users/login");
 
 		return authenticationFilter;
@@ -50,8 +49,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		// TODO Auto-generated method stub
+	
 		
+		// lets  spring framework know which service is used and which encoder is used.
 		auth.userDetailsService(userService).passwordEncoder(bCryptPasswordEncoder);
 		
 	}

@@ -4,8 +4,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 import com.example.users.UserDto;
+import com.example.users.model.UserRequestModel;
 
-@Component
+
+//need to implement spring framework's UserDetailsaService
 public interface UserService extends UserDetailsService
 {
 	UserDto createUser(UserDto userDto);
@@ -16,4 +18,8 @@ public interface UserService extends UserDetailsService
 
 	
 	UserDto getUserWithOutAlbums(String userId);
+	
+	void deleteUserByUserId(String userId);
+	
+	UserDto updateUserByUserId(String userId,UserRequestModel user);
 }
