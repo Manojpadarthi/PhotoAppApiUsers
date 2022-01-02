@@ -10,6 +10,7 @@ import org.modelmapper.convention.MatchingStrategies;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -96,7 +97,7 @@ public class UserController
 	@GetMapping(path="/status/check")
 	public String status() {
 		
-		return "working on port "+ env.getProperty("local.server.port") + " "+ env.getProperty("token.secret");
+		return "working on port "+ env.getProperty("local.server.port") + " "+"and with token secret "+ env.getProperty("token.secret");
 	}
 	
 	@PostMapping(consumes= {MediaType.APPLICATION_JSON_VALUE,MediaType.APPLICATION_XML_VALUE}
